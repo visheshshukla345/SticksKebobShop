@@ -1,0 +1,361 @@
+---
+title: "MGT251Assignment2"
+output: html_document
+date: "2024-04-12"
+name: Vishesh Jaiprakash Shukla
+---
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(cluster)    # For clustering and silhouette
+library(factoextra) # For visualizing clusters and PCA
+# Load the readxl package
+library(readxl)
+
+```
+
+```{r}
+# Import data from two sheets of the Excel file
+cust_data <- read_excel("CustCleaned.xlsx", sheet = "Sheet1")
+noncust_data <- read_excel("NonCustomerCleaned.xlsx", sheet = "Sheet1")
+data <- read_xlsx("Sticks Kebob UV7035-XLS-ENG.xlsx", sheet = "Sheet1")
+
+```
+```{r}
+#Analysis using Segments Data from Sheet1
+data_cleaned <- data %>%
+  filter_all(all_vars(. != ""))
+print(data_cleaned)
+```
+```{r}
+
+summary(data_cleaned)
+```
+
+```{r}
+#Elbow method
+data_scaled <- scale(data_cleaned)
+fviz_nbclust(data_scaled, kmeans, method = "wss", k.max = 15) + 
+  labs(title = "Elbow Method for Optimal k")
+
+```
+
+```{r}
+
+#Silhouette method
+fviz_nbclust(data_scaled, kmeans, method = "silhouette", k.max = 15) + 
+  labs(title = "Silhouette Method for Optimal k")
+```
+
+```{r}
+# Clustering 1
+# Assume k=4
+set.seed(123) 
+kmeans_result <- kmeans(data_scaled, centers = 4, nstart = 25)
+
+fviz_cluster(kmeans_result, geom = "point", data = data_scaled) + 
+  labs(title = "Cluster Visualization")
+
+
+```
+
+```{r}
+# Clustering 3
+# Assume k=3
+data_scaled <- scale(data_cleaned)
+set.seed(123) 
+kmeans_result <- kmeans(data_scaled, centers = 3, nstart = 25)
+
+fviz_cluster(kmeans_result, geom = "point", data = data_scaled) + 
+  labs(title = "Cluster Visualization")
+
+```
+
+```{r}
+# Clustering 2
+# Assume k=2
+data_scaled <- scale(data_cleaned)
+set.seed(123) 
+kmeans_result <- kmeans(data_scaled, centers = 2, nstart = 25)
+
+fviz_cluster(kmeans_result, geom = "point", data = data_scaled) + 
+  labs(title = "Cluster Visualization")
+
+```
+
+```{r}
+data_scaled$cluster <- kmeans_result$cluster
+
+```
+
+```{r}
+data_scaled_df <- as.data.frame(data_cleaned)
+
+data_scaled_df$cluster <- kmeans_result$cluster
+
+cluster_means <- data_scaled_df %>%
+  group_by(cluster) %>%
+  summarise_all(mean, na.rm = TRUE) 
+
+print(cluster_means)
+
+```
+```{r}
+
+data_scaled_df <- as.data.frame(data_cleaned)
+
+data_scaled_df$cluster <- kmeans_result$cluster
+
+cluster_means <- data_scaled_df %>%
+  group_by(cluster) %>%
+  summarise_all(mean, na.rm = TRUE) 
+
+print(cluster_means)
+```
+
+```{r}
+#Dendrogram
+data_scaled <- scale(data_cleaned)
+d <- dist(data_scaled, method = "euclidean")
+hc <- hclust(d, method = "ward.D2")
+plot(hc, main = "Hierarchical Clustering Dendrogram", sub = "", xlab = "", cex.lab = 1.2, cex.axis = 0.9, cex.main = 1.5)
+
+```
+```{r}
+
+library(dplyr)
+clusters_hc <- cutree(hc, k = 3)
+
+
+data_scaled <- as.data.frame(data_scaled)
+
+
+data_scaled$cluster_hc <- clusters_hc
+
+
+cluster_means <- data_scaled %>%
+  group_by(cluster_hc) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+```
+
+```{r}
+
+print(cluster_means)
+```
+
+
+```{r}
+# Get the names of the columns that are common to both data frames
+common_columns <- intersect(names(cust_data), names(noncust_data))
+
+```
+
+```{r}
+# Subset both data frames to keep only the common columns
+cust_data_common <- cust_data[, common_columns]
+noncust_data_common <- noncust_data[, common_columns]
+
+# Combine the rows of both data frames
+combined_data <- rbind(cust_data_common, noncust_data_common)
+
+
+```
+```{r}
+#install.packages("rstatix")
+```
+```{r}
+library(factoextra)
+library(tidyverse)
+
+```
+
+```{r}
+# Scale the data
+data_scaled <- scale(combined_data)
+
+# Perform PCA
+pca_result <- prcomp(data_scaled, center = TRUE, scale. = TRUE)
+
+# Examine variance to see how many PCs explain most of the variance
+fviz_eig(pca_result, addlabels = TRUE, ylim = c(0, 100)) +
+  labs(title = "Variance Explained by Principal Components")
+
+```
+
+```{r}
+# Choose the number of principal components to retain based on the scree plot
+# For visualization, we usually retain 2 PCs
+data_pca <- as.data.frame(pca_result$x[, 1:2])
+
+# Determine the optimal number of clusters using the Elbow method on PCA data
+fviz_nbclust(data_pca, kmeans, method = "wss", k.max = 6) + 
+  labs(title = "Elbow Method for Optimal k (PCA Data)")
+
+```
+
+```{r}
+# Determine the optimal number of clusters using the Silhouette method on PCA data
+fviz_nbclust(data_pca, kmeans, method = "silhouette", k.max = 6) + 
+  labs(title = "Silhouette Method for Optimal k (PCA Data)")
+
+```
+
+```{r}
+# Assuming the optimal number of clusters based on above analyses is, say, 3
+set.seed(123) # For reproducibility
+kmeans_result_pca <- kmeans(data_pca, centers = 3, nstart = 25)
+
+# Add the cluster assignments to your PCA data
+data_pca$cluster <- kmeans_result_pca$cluster
+
+# Visualize clusters based on PCA
+fviz_cluster(kmeans_result_pca, data = data_pca, geom = "point") + 
+  labs(title = "Cluster Visualization with PCA")
+
+```
+
+```{r}
+# Assuming `data_scaled` is your scaled data before PCA and `kmeans_result_pca` is your k-means result on PCA data
+
+# Convert the scaled data to a data frame if it's not already
+data_scaled_df <- as.data.frame(data_scaled)
+
+# Add the cluster assignments to your original scaled data frame
+data_scaled_df$cluster <- kmeans_result_pca$cluster
+
+# Calculate the mean of each variable for each cluster
+cluster_means <- data_scaled_df %>%
+  group_by(cluster) %>%
+  summarise_all(mean, na.rm = TRUE) # Use na.rm = TRUE to remove any NA values
+
+# View the mean values per cluster
+print(cluster_means)
+
+```
+
+```{r}
+# Assuming the optimal number of clusters based on above analyses is, say, 2
+set.seed(123) # For reproducibility
+kmeans_result_pca <- kmeans(data_pca, centers = 2, nstart = 25)
+
+# Add the cluster assignments to your PCA data
+data_pca$cluster <- kmeans_result_pca$cluster
+
+# Visualize clusters based on PCA
+fviz_cluster(kmeans_result_pca, data = data_pca, geom = "point") + 
+  labs(title = "Cluster Visualization with PCA")
+
+```
+
+```{r}
+# Assuming the optimal number of clusters based on above analyses is, say, 4
+set.seed(123) # For reproducibility
+kmeans_result_pca <- kmeans(data_pca, centers = 4, nstart = 25)
+
+# Add the cluster assignments to your PCA data
+data_pca$cluster <- kmeans_result_pca$cluster
+
+# Visualize clusters based on PCA
+fviz_cluster(kmeans_result_pca, data = data_pca, geom = "point") + 
+  labs(title = "Cluster Visualization with PCA")
+
+```
+```{r}
+# Compute the distance matrix on the PCA-reduced data
+d <- dist(data_pca[, -ncol(data_pca)], method = "euclidean")
+
+# Perform hierarchical clustering using Ward's method
+hc <- hclust(d, method = "ward.D2")
+
+# Assuming you want to cut the dendrogram at 4 clusters
+clusters_hc <- cutree(hc, k = 4)
+
+# Add the hierarchical cluster assignments to your PCA data
+data_pca$cluster_hc <- clusters_hc
+# Plot the dendrogram
+plot(hc, main = "Hierarchical Clustering Dendrogram", sub = "", xlab = "", cex.lab = 1.2, cex.axis = 0.9, cex.main = 1.5)
+
+# Draw the cut line for 4 clusters (optional)
+abline(h = hc$height[which(diff(hc$height) > diff(range(hc$height)) / 4)[1]], col = "red")
+
+```
+```{r}
+# Assuming 'hc' is your previously computed hclust object
+# and 'data_pca' is the PCA-reduced data before adding clusters
+
+# Cut the dendrogram to form 3 clusters
+clusters_hc <- cutree(hc, k = 3)
+
+# Add the hierarchical cluster assignments to your PCA data frame
+data_pca$cluster_hc <- clusters_hc
+
+# Ensure data_pca is a data frame
+data_pca <- as.data.frame(data_pca)
+
+# Calculate means for each cluster
+# First, let's remove the last column if it's an existing cluster assignment
+data_pca <- data_pca[, -ncol(data_pca)]
+# Now, add the new hierarchical clustering results
+data_pca$cluster_hc <- clusters_hc
+
+# Now we can group by 'cluster_hc' and summarize
+cluster_means_hc <- data_pca %>%
+  group_by(cluster_hc) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+```
+```{r}
+# View the mean values per cluster
+print(cluster_means_hc)
+
+```
+**Assignment Question**
+
+**Can you estimate from the survey data? What are the profiles of the customer segments?**
+
+Based on the cluster analysis, we have 3 distinct segments.
+
+Cluster 1: Health-Conscious Planners
+
+• Characteristics: High scores for planning things carefully and the importance of local products.
+
+• Health-conscious eating habits.
+
+• Moderate concern for controlling spending.
+
+Cluster 2: Middle-Aged Affluent Families
+
+• Characteristics: Slightly below-average likelihood of visiting the restaurant.
+
+• Older age group with higher household income.
+
+• Likely larger households or traditional families.
+
+• Moderate usage of coupons when dining out.
+
+Cluster 3: Regular Sticks Kebob Visitors
+
+• Characteristics: Much more likely to have visited Sticks Kebob Shop before.
+
+• Middle-aged with average or above average household income.
+
+• Smaller household sizes.
+
+• Frequent usage of coupons when dining out.
+
+**Which customer segments should Sticks target?**
+
+-Sticks Kebob should focus on Cluster 3: Regular Sticks Kebob Visitors.
+
+-This segment is more likely to visit the restaurant and may already have a favorable impression of the brand.
+
+-They are likely to be repeat clients with increased spending potential.
+
+-Use tailored marketing and loyalty programs to engage and retain this customer demographic.
+
+• Cluster 1: Health-conscious planners can also be targeted with offerings that reflect their health-conscious lifestyle and preferences.
+
+-Emphasize the health benefits of Sticks Kebob's menu options, including locally produced products.
+
+-Offer meal planning and budget-friendly options to meet their specific needs.
