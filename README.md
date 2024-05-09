@@ -36,4 +36,11 @@ In this project, I conducted an in-depth customer segmentation analysis for Stic
 - **Clustering Techniques**: Silhouette Method, PCA, Hierarchical Clustering
 - **Data Visualization**: R packages for graphical insights and cluster profiling
 
+# Repository Structure
 
+The project is organized into three key sections: Codes, Datasets, and Output files.
+
+1. **Codes Folder**: Contains all Python notebooks and R Markdown files. Data cleaning is performed within the Python notebooks, while segmentation is handled in the R Markdown files.
+2. **Datasets Folder**: Houses all dataset files, including both raw and cleaned versions. Certain Excel files include pivot tables and charts.
+3. **Outputs Folder**: Stores the segmentation analysis results, as well as the final PowerPoint presentation files.
+  
