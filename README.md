@@ -1,46 +1,49 @@
-# Sticks Kebob Shop Customer Segmentation Project
+# SticksKebobShop: Customer Segmentation for Expansion
 
-## Overview
-In this project, I conducted an in-depth customer segmentation analysis for Sticks Kebob Shop to provide strategic recommendations for understanding and expanding their customer base. The analysis aimed to uncover insights into how people choose which fast-food restaurants to visit, with a specific focus on Sticks Kebob Shop. I considered critical factors like location, price, menu variety, and cuisine preferences, to identify key segments and devise a plan for the company's growth.
+Who are Sticks Kebob Shop's customers, and where should the chain open next? This project segments survey respondents and turns the segments into a location recommendation.
 
-## Objectives
-- Understand Sticks Kebob Shop's customer base and their motivations.
-- Distinguish between customers and non-customers.
-- Identify the most relevant questions for segmenting customers.
-- Estimate the number of customer segments using statistical methods.
-- Create detailed profiles of each segment.
-- Recommend which segments Sticks Kebob Shop should target.
-- Propose an ideal location for the next Sticks restaurant.
+![Hierarchical clustering of survey respondents](assets/hero.png)
 
-## Methodology
-1. **Data Collection**: Collected survey data to gather insights on customer preferences and behaviors related to fast-food restaurants.
-  
-2. **Feature Selection**: Identified the most relevant questions in the survey that contribute to effective segmentation.
+## At a glance
 
-3. **Dimensionality Reduction**: Used Principal Component Analysis (PCA) to reduce the dimensionality of the dataset while retaining meaningful information.
+| | |
+|---|---|
+| **Role** | Analyst (segmentation, clustering) |
+| **Stack** | R (PCA, hierarchical clustering, silhouette), Python (data cleaning) |
+| **Data** | Customer and non-customer surveys on fast-food choice |
+| **Context** | UC Riverside MSBA project |
+| **Key result** | Profiled distinct customer segments and recommended the next-location type from their demographics |
 
-4. **Clustering Analysis**: 
-    - Implemented the Silhouette method to determine the optimal number of clusters.
-    - Performed hierarchical clustering to categorize respondents into distinct segments.
+## Problem & context
 
-5. **Segment Profiling**:
-    - Analyzed demographic and behavioral traits of each segment.
-    - Created detailed profiles outlining preferences, motivations, and key characteristics.
+Sticks Kebob Shop, a quick-service chain, wants to expand, but expansion should follow the customers. Using surveys of customers and non-customers, this project asks who visits and why, groups respondents into segments, and translates those segments into where a new store would do best.
 
-6. **Recommendations**:
-    - Proposed customer segments to target based on profitability, potential growth, and alignment with Sticks' strengths.
-    - Suggested an ideal location for the next Sticks Kebob Shop based on segmentation analysis and demographic profiling.
+## Approach
 
-## Tools and Technologies
-- **Programming Language**: R
-- **Clustering Techniques**: Silhouette Method, PCA, Hierarchical Clustering
-- **Data Visualization**: R packages for graphical insights and cluster profiling
+- **Data cleaning:** prepared the customer and non-customer survey responses in Python.
+- **Feature selection:** kept the survey questions that most drive restaurant choice.
+- **Dimensionality reduction:** ran PCA to compress the questionnaire into its main dimensions.
+- **Clustering:** used the silhouette method to choose the number of clusters, then hierarchical clustering to assign segments.
+- **Profiling and recommendation:** described each segment's demographics and behavior, then mapped them to location types.
 
-# Repository Structure
+## Key findings
 
-The project is organized into three key sections: Codes, Datasets, and Output files.
+- Respondents split into distinct segments, including a health-conscious, convenience-driven group that fits Sticks' positioning.
+- Segment profiles pointed to specific location types: urban business districts for the health-conscious planner segment, and suburban family communities for others.
+- The analysis gives the chain a targeting and site-selection rationale grounded in customer data rather than intuition.
 
-1. **Codes Folder**: Contains all Python notebooks and R Markdown files. Data cleaning is performed within the Python notebooks, while segmentation is handled in the R Markdown files.
-2. **Datasets Folder**: Houses all dataset files, including both raw and cleaned versions. Certain Excel files include pivot tables and charts.
-3. **Outputs Folder**: Stores the segmentation analysis results, as well as the final PowerPoint presentation files.
-  
+## Repo guide
+
+- `Codes/`: Python notebooks (data cleaning) and the R Markdown segmentation analysis.
+- `Datasets/`: raw and cleaned customer and non-customer survey data.
+- `Outputs/`: the rendered analysis and the slide deck.
+- `assets/hero.png`: hierarchical clustering dendrogram of survey respondents.
+
+**Reproduce:** run the cleaning notebooks in `Codes/`, then knit the R Markdown to reproduce the PCA, clustering, and segment profiles.
+
+---
+
+Tools: R · PCA · hierarchical clustering · Python · survey analytics
+Part of my portfolio: https://visheshshukla.netlify.app
+
+_Team academic project (UC Riverside MSBA). Survey data collected for the course._
